@@ -1,4 +1,5 @@
 import React, { useState } from 'react'
+import { Link } from 'react-router-dom'
 import AppBar from '@material-ui/core/AppBar'
 import Button from '@material-ui/core/Button'
 import CameraIcon from '@material-ui/icons/PhotoCamera'
@@ -13,7 +14,7 @@ import Typography from '@material-ui/core/Typography'
 import { makeStyles } from '@material-ui/core/styles'
 import Container from '@material-ui/core/Container'
 import Modal from '@material-ui/core/Modal'
-import Link from '@material-ui/core/Link'
+// import Link from '@material-ui/core/Link'
 import SwipeableDrawer from '@material-ui/core/SwipeableDrawer'
 import List from '@material-ui/core/List'
 import Divider from '@material-ui/core/Divider'
@@ -22,6 +23,9 @@ import ListItemIcon from '@material-ui/core/ListItemIcon'
 import ListItemText from '@material-ui/core/ListItemText'
 import InboxIcon from '@material-ui/icons/MoveToInbox'
 import MailIcon from '@material-ui/icons/Mail'
+import Home from '@material-ui/icons/Home'
+import ShoppingCart from '@material-ui/icons/ShoppingCart'
+import ViewList from '@material-ui/icons/ViewList'
 import RemoveIcon from '@material-ui/icons/Remove'
 import AddIcon from '@material-ui/icons/Add'
 import { ButtonGroup } from '@material-ui/core'
@@ -30,9 +34,9 @@ function Copyright() {
     return (
         <Typography variant="body2" color="textSecondary" align="center">
             {'Copyright © '}
-            <Link color="inherit" href="https://material-ui.com/">
+            {/* <Link color="inherit" href="https://material-ui.com/">
                 Your Website
-            </Link>{' '}
+            </Link>{' '} */}
             {new Date().getFullYear()}
             {'.'}
         </Typography>
@@ -41,7 +45,7 @@ function Copyright() {
 
 const useStyles = makeStyles((theme) => ({
     icon: {
-        marginRight: theme.spacing(2),
+        marginRight: theme.spacing(1),
     },
     heroContent: {
         backgroundColor: theme.palette.background.paper,
@@ -106,14 +110,6 @@ export default function Album() {
     return (
         <React.Fragment>
             <CssBaseline />
-            <AppBar position="relative">
-                <Toolbar>
-                    <CameraIcon className={classes.icon} />
-                    <Typography variant="h6" color="inherit" noWrap>
-                        Album layout
-                    </Typography>
-                </Toolbar>
-            </AppBar>
             <main>
                 {/* Hero unit */}
                 {/* <Modal
