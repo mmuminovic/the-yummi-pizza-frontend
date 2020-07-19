@@ -1,6 +1,7 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { AppBar, Toolbar, Typography } from '@material-ui/core'
+import { connect } from 'react-redux'
+import { AppBar, Toolbar, Typography, Badge } from '@material-ui/core'
 import { Home, ShoppingCart, ViewList } from '@material-ui/icons'
 import { makeStyles } from '@material-ui/core/styles'
 
@@ -10,8 +11,10 @@ const useStyles = makeStyles((theme) => ({
     },
 }))
 
-const Navigation = () => {
+const Navigation = (props) => {
     const classes = useStyles()
+
+    console.log(props)
 
     return (
         <React.Fragment>
@@ -27,7 +30,7 @@ const Navigation = () => {
                         }}
                     >
                         <Typography
-                            variant="p"
+                            variant="caption"
                             color="inherit"
                             noWrap
                             className="align-items-center"
@@ -46,13 +49,22 @@ const Navigation = () => {
                         }}
                     >
                         <Typography
-                            variant="p"
+                            variant="caption"
                             color="inherit"
                             noWrap
                             className="align-items-center"
                             style={{ fontSize: 14 }}
                         >
-                            <ShoppingCart className={classes.icon} />
+                            <Badge
+                                badgeContent={props.cart.length}
+                                color="secondary"
+                                anchorOrigin={{
+                                    vertical: 'top',
+                                    horizontal: 'left',
+                                }}
+                            >
+                                <ShoppingCart className={classes.icon} />
+                            </Badge>
                             <span>Cart</span>
                         </Typography>
                     </NavLink>
@@ -65,7 +77,7 @@ const Navigation = () => {
                         }}
                     >
                         <Typography
-                            variant="p"
+                            variant="caption"
                             color="inherit"
                             noWrap
                             className="align-items-center"
@@ -81,4 +93,9 @@ const Navigation = () => {
     )
 }
 
-export default Navigation
+const mapStateToProps = (state) => ({
+    ...state.cart,
+    ...state.auth,
+})
+
+export default connect(mapStateToProps, null)(Navigation)

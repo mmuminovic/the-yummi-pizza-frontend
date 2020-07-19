@@ -1,34 +1,22 @@
 import React, { useState } from 'react'
+import { useQuery } from 'react-query'
 import { Link } from 'react-router-dom'
-import AppBar from '@material-ui/core/AppBar'
-import Button from '@material-ui/core/Button'
-import CameraIcon from '@material-ui/icons/PhotoCamera'
-import Card from '@material-ui/core/Card'
-import CardActions from '@material-ui/core/CardActions'
-import CardContent from '@material-ui/core/CardContent'
-import CardMedia from '@material-ui/core/CardMedia'
-import CssBaseline from '@material-ui/core/CssBaseline'
-import Grid from '@material-ui/core/Grid'
-import Toolbar from '@material-ui/core/Toolbar'
-import Typography from '@material-ui/core/Typography'
+import {
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    CardMedia,
+    CssBaseline,
+    Grid,
+    Typography,
+    Container,
+    SwipeableDrawer,
+    ButtonGroup,
+} from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
-import Container from '@material-ui/core/Container'
-import Modal from '@material-ui/core/Modal'
-// import Link from '@material-ui/core/Link'
-import SwipeableDrawer from '@material-ui/core/SwipeableDrawer'
-import List from '@material-ui/core/List'
-import Divider from '@material-ui/core/Divider'
-import ListItem from '@material-ui/core/ListItem'
-import ListItemIcon from '@material-ui/core/ListItemIcon'
-import ListItemText from '@material-ui/core/ListItemText'
-import InboxIcon from '@material-ui/icons/MoveToInbox'
-import MailIcon from '@material-ui/icons/Mail'
-import Home from '@material-ui/icons/Home'
-import ShoppingCart from '@material-ui/icons/ShoppingCart'
-import ViewList from '@material-ui/icons/ViewList'
-import RemoveIcon from '@material-ui/icons/Remove'
-import AddIcon from '@material-ui/icons/Add'
-import { ButtonGroup } from '@material-ui/core'
+import { Remove as RemoveIcon, Add as AddIcon } from '@material-ui/icons'
+import { getProducts } from '../services/products'
 
 function Copyright() {
     return (
@@ -102,10 +90,27 @@ function getModalStyle() {
 
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-export default function Album() {
+export default function Album(props) {
     const [modal, setModal] = useState(false)
+    const [loading, setLoading] = useState(false)
     const [modalStyle] = useState(getModalStyle)
+    const [productInfo, setProductInfo] = useState(null)
     const classes = useStyles()
+
+    const { data: products } = useQuery({
+        queryKey: 'products',
+        queryFn: async () => await getProducts(),
+        config: {
+            onSuccess: (data) => {
+                setLoading(false)
+            },
+            onError: (err) => {
+                setLoading(false)
+            },
+        },
+    })
+
+    console.log(productInfo)
 
     return (
         <React.Fragment>
@@ -128,9 +133,9 @@ export default function Album() {
                 </Modal> */}
                 <SwipeableDrawer
                     anchor={'bottom'}
-                    open={modal}
-                    onClose={() => setModal(!modal)}
-                    onOpen={() => setModal(!modal)}
+                    open={!!productInfo}
+                    onClose={() => setProductInfo(null)}
+                    onOpen={() => setProductInfo(productInfo)}
                 >
                     <div
                         style={{
@@ -146,7 +151,7 @@ export default function Album() {
                             >
                                 <CardMedia
                                     className={classes.cardMedia}
-                                    image="https://source.unsplash.com/random"
+                                    image={productInfo && productInfo.imageUrl}
                                     title="Image title"
                                 />
                                 <CardContent className={classes.cardContent}>
@@ -155,7 +160,7 @@ export default function Album() {
                                         variant="h5"
                                         component="h2"
                                     >
-                                        Heading
+                                        {productInfo && productInfo.title}
                                     </Typography>
                                     <div
                                         style={{
@@ -164,23 +169,72 @@ export default function Album() {
                                             justifyContent: 'space-between',
                                         }}
                                     >
-                                        <Typography>5.99$</Typography>
+                                        <Typography>
+                                            {productInfo && productInfo.price}
+                                        </Typography>
                                         <ButtonGroup
                                             variant="text"
                                             color="primary"
                                             aria-label="text primary button group"
                                         >
-                                            <Button>
-                                                <AddIcon />
-                                            </Button>
-                                            <Button>1</Button>
-                                            <Button>
-                                                <RemoveIcon />
-                                            </Button>
+                                            <span
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    textAlign: 'center',
+                                                }}
+                                                onClick={() => {
+                                                    const quantity =
+                                                        productInfo.quantity + 1
+                                                    setProductInfo({
+                                                        ...productInfo,
+                                                        quantity,
+                                                    })
+                                                }}
+                                            >
+                                                <AddIcon color="primary" />
+                                            </span>
+                                            <span
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center',
+                                                }}
+                                            >
+                                                {productInfo &&
+                                                    productInfo.quantity}
+                                            </span>
+                                            <span
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    textAlign: 'center',
+                                                }}
+                                                onClick={() => {
+                                                    const quantity =
+                                                        productInfo.quantity - 1
+                                                    if (quantity >= 1) {
+                                                        setProductInfo({
+                                                            ...productInfo,
+                                                            quantity,
+                                                        })
+                                                    }
+                                                }}
+                                            >
+                                                <RemoveIcon color="primary" />
+                                            </span>
                                         </ButtonGroup>
                                     </div>
-                                    <Typography style={{ textAlign: 'center' }}>
-                                        1 x 5.99$ + 2$ (shipping) = 7.99$
+                                    <Typography
+                                        style={{
+                                            textAlign: 'center',
+                                            marginTop: '24px',
+                                        }}
+                                    >
+                                        Total:{' '}
+                                        {productInfo &&
+                                            (
+                                                productInfo.quantity *
+                                                productInfo.price
+                                            ).toFixed(2)}
                                     </Typography>
                                 </CardContent>
                             </Card>
@@ -241,45 +295,61 @@ export default function Album() {
                 <Container className={classes.cardGrid} maxWidth="md">
                     {/* End hero unit */}
                     <Grid container spacing={4}>
-                        {cards.map((card) => (
-                            <Grid item key={card} xs={12} sm={6} md={4}>
-                                <Card className={classes.card}>
-                                    <CardMedia
-                                        className={classes.cardMedia}
-                                        image="https://source.unsplash.com/random"
-                                        title="Image title"
-                                    />
-                                    <CardContent
-                                        className={classes.cardContent}
-                                    >
-                                        <Typography
-                                            gutterBottom
-                                            variant="h5"
-                                            component="h2"
+                        {products &&
+                            products.map((product) => (
+                                <Grid
+                                    item
+                                    key={product.id}
+                                    xs={12}
+                                    sm={6}
+                                    md={4}
+                                >
+                                    <Card className={classes.card}>
+                                        <CardMedia
+                                            className={classes.cardMedia}
+                                            image={product.imageUrl}
+                                            title="Image title"
+                                        />
+                                        <CardContent
+                                            className={classes.cardContent}
                                         >
-                                            Heading
-                                        </Typography>
-                                        <Typography>
-                                            This is a media card. You can use
-                                            this section to describe the
-                                            content.
-                                        </Typography>
-                                    </CardContent>
-                                    <CardActions>
-                                        <Button
-                                            size="small"
-                                            color="primary"
-                                            onClick={() => setModal(!modal)}
-                                        >
-                                            View
-                                        </Button>
-                                        <Button size="small" color="primary">
-                                            Edit
-                                        </Button>
-                                    </CardActions>
-                                </Card>
-                            </Grid>
-                        ))}
+                                            <Typography
+                                                gutterBottom
+                                                variant="h5"
+                                                component="h2"
+                                            >
+                                                {product.title}
+                                            </Typography>
+                                            <Typography>
+                                                {product.description}
+                                            </Typography>
+                                            <Typography color="primary">
+                                                ${product.price}
+                                            </Typography>
+                                        </CardContent>
+                                        <CardActions>
+                                            <Button
+                                                size="small"
+                                                color="primary"
+                                                onClick={() =>
+                                                    setProductInfo({
+                                                        ...product,
+                                                        quantity: 1,
+                                                    })
+                                                }
+                                            >
+                                                View
+                                            </Button>
+                                            <Button
+                                                size="small"
+                                                color="primary"
+                                            >
+                                                Edit
+                                            </Button>
+                                        </CardActions>
+                                    </Card>
+                                </Grid>
+                            ))}
                     </Grid>
                 </Container>
             </main>
