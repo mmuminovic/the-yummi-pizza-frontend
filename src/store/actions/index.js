@@ -1,6 +1,6 @@
 import { logoutUser, login, setCurrentUser } from './auth'
 
-import { updateCart, clearCart } from './cart'
+import { updateCart, clearCart, removeFromCart } from './cart'
 
 const actions = {
     logoutUser,
@@ -8,6 +8,7 @@ const actions = {
     setCurrentUser,
     updateCart,
     clearCart,
+    removeFromCart,
 }
 
 export default actions

@@ -7,6 +7,13 @@ export const updateCart = (data) => {
     }
 }
 
+export const removeFromCart = (data) => {
+    return {
+        type: actionTypes.REMOVE_FROM_CART,
+        payload: data,
+    }
+}
+
 export const clearCart = () => {
     return {
         type: actionTypes.CLEAR_CART,

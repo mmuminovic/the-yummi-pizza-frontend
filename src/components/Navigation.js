@@ -1,7 +1,7 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { AppBar, Toolbar, Typography, Badge } from '@material-ui/core'
-import { Home, ShoppingCart, ViewList, Laptop } from '@material-ui/icons'
+import { Home, ShoppingCart, ViewList } from '@material-ui/icons'
 import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme) => ({
@@ -83,7 +83,7 @@ const Navigation = (props) => {
                             </Typography>
                         </NavLink>
                     )}
-                    <NavLink
+                    {/* <NavLink
                         to="/login"
                         className="nav-link"
                         activeStyle={{
@@ -101,7 +101,7 @@ const Navigation = (props) => {
                             <Laptop className={classes.icon} />
                             <span>Login</span>
                         </Typography>
-                    </NavLink>
+                    </NavLink> */}
                 </Toolbar>
             </AppBar>
         </React.Fragment>

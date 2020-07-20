@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import { useQuery, useMutation } from 'react-query'
 import { connect } from 'react-redux'
-import { Link } from 'react-router-dom'
 import {
     Button,
     Card,
@@ -16,18 +15,15 @@ import {
     Modal,
 } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
-import { Remove as RemoveIcon, Add as AddIcon } from '@material-ui/icons'
+import {
+    Remove as RemoveIcon,
+    Add as AddIcon,
+    Cancel as CancelIcon,
+} from '@material-ui/icons'
 import { getProducts, takeOrder } from '../services/products'
 import actions from '../store/actions/index'
 import Navigation from '../components/Navigation'
-import {
-    ModalFooter,
-    Form,
-    Input,
-    Label,
-    FormGroup,
-    Spinner,
-} from 'reactstrap'
+import { ModalFooter, Form, Input, Label, FormGroup, Spinner } from 'reactstrap'
 import { Formik } from 'formik'
 import * as Yup from 'yup'
 
@@ -100,8 +96,8 @@ const useStyles = makeStyles((theme) => ({
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',
-        border: '1px solid black',
         flexGrow: 1,
+        border: '1px solid black',
         padding: '8px 15px',
         borderRadius: '5px',
     },
@@ -110,7 +106,8 @@ const useStyles = makeStyles((theme) => ({
 const Homepage = (props) => {
     const [modal, setModal] = useState(false)
     const [loading, setLoading] = useState(false)
-    const [orderProducts, setOrderProducts] = useState(null)
+    const [orderProducts, setOrderProducts] = useState(false)
+    const [order, setOrder] = useState(null)
     const [productInfo, setProductInfo] = useState(null)
     const classes = useStyles()
 
@@ -138,7 +135,6 @@ const Homepage = (props) => {
             onSuccess: () => {
                 setModal(false)
                 setProductInfo(false)
-                props.clearCart()
             },
             onError: () => {
                 setLoading(false)
@@ -172,10 +168,87 @@ const Homepage = (props) => {
                                 padding: '48px',
                             }}
                         >
-                            <p>Taking the order was successful!</p>
+                            <Typography
+                                gutterBottom
+                                variant="h5"
+                                component="h2"
+                            >
+                                Taking the order was successful!
+                            </Typography>
+                            <Typography>Your order:</Typography>
+                            <p style={{ margin: '0' }}>
+                                Name: {order && order.name}
+                            </p>
+                            <p style={{ margin: '0' }}>
+                                Address: {order && order.address}
+                            </p>
+                            <p style={{ margin: '0' }}>
+                                Phone number: {order && order.phoneNumber}
+                            </p>
+                            <div
+                                style={{
+                                    maxHeight: '400px',
+                                    overflow: 'auto',
+                                    marginBottom: '16px',
+                                }}
+                            >
+                                <p
+                                    style={{
+                                        marginBottom: '0',
+                                        marginTop: '16px',
+                                    }}
+                                >
+                                    Products:
+                                </p>
+                                {props.cart.map((item, i) => (
+                                    <div className={classes.modalItem}>
+                                        <div>
+                                            <p style={{ margin: '0' }}>
+                                                {item.title}
+                                            </p>
+                                            <p style={{ margin: '0' }}>
+                                                {item.quantity} x ${item.price}{' '}
+                                                = $
+                                                {(
+                                                    item.quantity * item.price
+                                                ).toFixed(2)}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div>
+                                {props.cart.length > 1
+                                    ? `Total: ${props.cart
+                                          .reduce((acc, val) => {
+                                              return (
+                                                  acc.price * acc.quantity +
+                                                  val.price * val.quantity
+                                              )
+                                          })
+                                          .toFixed(2)} + $10 (shipping) = ${(
+                                          props.cart.reduce((acc, val) => {
+                                              return (
+                                                  acc.price * acc.quantity +
+                                                  val.price * val.quantity
+                                              )
+                                          }) + 10
+                                      ).toFixed(2)}`
+                                    : `Total: ${(
+                                          props.cart[0].price *
+                                          props.cart[0].quantity
+                                      ).toFixed(2)} + $10 (shipping) = ${(
+                                          props.cart[0].price *
+                                              props.cart[0].quantity +
+                                          10
+                                      ).toFixed(2)}`}
+                            </div>
                             <Button
                                 color="secondary"
-                                onClick={() => setOrderProducts(false)}
+                                onClick={() => {
+                                    setOrderProducts(null)
+                                    props.clearCart()
+                                }}
                             >
                                 Close
                             </Button>
@@ -188,6 +261,7 @@ const Homepage = (props) => {
                                 phoneNumber: '',
                             }}
                             onSubmit={async (values, actions) => {
+                                setOrder({ ...values, products: props.cart })
                                 takeTheOrder(values)
                             }}
                             validationSchema={Yup.object().shape({
@@ -346,13 +420,33 @@ const Homepage = (props) => {
                                         />
                                     </div>
                                     <div>
-                                        <Typography
-                                            gutterBottom
-                                            variant="h5"
-                                            component="h2"
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                alignItems: 'center',
+                                            }}
                                         >
-                                            {item.title}
-                                        </Typography>
+                                            <Typography
+                                                gutterBottom
+                                                variant="h5"
+                                                component="h2"
+                                                style={{
+                                                    display: 'inline-block',
+                                                    margin: '0',
+                                                    marginRight: '16px',
+                                                }}
+                                            >
+                                                {item.title}
+                                            </Typography>
+                                            <span
+                                                onClick={() =>
+                                                    props.removeCartItem(item)
+                                                }
+                                                style={{ cursor: 'pointer' }}
+                                            >
+                                                <CancelIcon htmlColor="#f50057" />
+                                            </span>
+                                        </div>
                                         <p>
                                             {item.quantity} x ${item.price} = $
                                             {(
@@ -422,11 +516,21 @@ const Homepage = (props) => {
                             </div>
                         )}
                         {props.cart.length > 0 ? (
-                            <div>
-                                <div className={classes.modalItem}>
-                                    Shipping: $10
-                                </div>
-                                <div className={classes.modalItem}>
+                            <div
+                                style={{
+                                    textAlign: 'center',
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    alignItems: 'center',
+                                }}
+                            >
+                                <div>Shipping: $10</div>
+                                <div
+                                    className={classes.modalItem}
+                                    style={{
+                                        width: '350px',
+                                    }}
+                                >
                                     {props.cart.length > 1
                                         ? `Total: ${props.cart
                                               .reduce((acc, val) => {
@@ -758,6 +862,7 @@ const mapDispatchToProps = (dispatch) => {
     return {
         updateCart: (products) => dispatch(actions.updateCart(products)),
         clearCart: () => dispatch(actions.clearCart()),
+        removeCartItem: (item) => dispatch(actions.removeFromCart(item)),
     }
 }
 export default connect(mapStateToProps, mapDispatchToProps)(Homepage)

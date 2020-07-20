@@ -24,6 +24,13 @@ const reducer = (state = initialState, action) => {
                 cart: [],
             }
             return state
+        case actionTypes.REMOVE_FROM_CART:
+            state = {
+                cart: state.cart.filter(
+                    (item) => item.id !== action.payload.id
+                ),
+            }
+            return state
         default:
             return state
     }
