@@ -1,4 +1,4 @@
-## *The Yummi Pizza project
+## The Yummi Pizza project
 
 In the project directory, start the project localy with next commands:
 
