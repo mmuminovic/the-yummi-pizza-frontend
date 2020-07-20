@@ -6,3 +6,9 @@ export const updateCart = (data) => {
         payload: data,
     }
 }
+
+export const clearCart = () => {
+    return {
+        type: actionTypes.CLEAR_CART,
+    }
+}

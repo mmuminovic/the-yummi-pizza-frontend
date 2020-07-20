@@ -2,7 +2,7 @@ import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { connect } from 'react-redux'
 import { AppBar, Toolbar, Typography, Badge } from '@material-ui/core'
-import { Home, ShoppingCart, ViewList } from '@material-ui/icons'
+import { Home, ShoppingCart, ViewList, Laptop } from '@material-ui/icons'
 import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme) => ({
@@ -40,13 +40,10 @@ const Navigation = (props) => {
                             <span>Homepage</span>
                         </Typography>
                     </NavLink>
-                    <NavLink
-                        to="/cart"
+                    <span
+                        onClick={props.openCart}
                         className="nav-link"
-                        activeStyle={{
-                            fontWeight: 'bold',
-                            color: '#ff8888',
-                        }}
+                        style={{ cursor: 'pointer' }}
                     >
                         <Typography
                             variant="caption"
@@ -67,9 +64,30 @@ const Navigation = (props) => {
                             </Badge>
                             <span>Cart</span>
                         </Typography>
-                    </NavLink>
+                    </span>
+                    {props.isAuth && (
+                        <NavLink
+                            to="/orders"
+                            className="nav-link"
+                            activeStyle={{
+                                fontWeight: 'bold',
+                                color: '#ff8888',
+                            }}
+                        >
+                            <Typography
+                                variant="caption"
+                                color="inherit"
+                                noWrap
+                                className="align-items-center"
+                                style={{ fontSize: 14 }}
+                            >
+                                <ViewList className={classes.icon} />
+                                <span>Orders</span>
+                            </Typography>
+                        </NavLink>
+                    )}
                     <NavLink
-                        to="/orders"
+                        to="/login"
                         className="nav-link"
                         activeStyle={{
                             fontWeight: 'bold',
@@ -83,8 +101,8 @@ const Navigation = (props) => {
                             className="align-items-center"
                             style={{ fontSize: 14 }}
                         >
-                            <ViewList className={classes.icon} />
-                            <span>Orders</span>
+                            <Laptop className={classes.icon} />
+                            <span>Login</span>
                         </Typography>
                     </NavLink>
                 </Toolbar>
@@ -98,4 +116,4 @@ const mapStateToProps = (state) => ({
     ...state.auth,
 })
 
-export default connect(mapStateToProps, null)(Navigation)
+export default Navigation

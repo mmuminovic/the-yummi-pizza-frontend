@@ -1,5 +1,6 @@
 import React, { useState } from 'react'
 import { useQuery } from 'react-query'
+import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
 import {
     Button,
@@ -17,6 +18,8 @@ import {
 import { makeStyles } from '@material-ui/core/styles'
 import { Remove as RemoveIcon, Add as AddIcon } from '@material-ui/icons'
 import { getProducts } from '../services/products'
+import actions from '../store/actions/index'
+import Navigation from '../components/Navigation'
 
 function Copyright() {
     return (
@@ -90,7 +93,7 @@ function getModalStyle() {
 
 const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
-export default function Album(props) {
+const Homepage = (props) => {
     const [modal, setModal] = useState(false)
     const [loading, setLoading] = useState(false)
     const [modalStyle] = useState(getModalStyle)
@@ -110,10 +113,11 @@ export default function Album(props) {
         },
     })
 
-    console.log(productInfo)
+    console.log(props)
 
     return (
         <React.Fragment>
+            <Navigation {...props} openCart={() => setModal(true)} />
             <CssBaseline />
             <main>
                 {/* Hero unit */}
@@ -138,6 +142,7 @@ export default function Album(props) {
                     onOpen={() => setProductInfo(productInfo)}
                 >
                     <div
+                        component="children"
                         style={{
                             display: 'flex',
                             justifyContent: 'center',
@@ -151,8 +156,10 @@ export default function Album(props) {
                             >
                                 <CardMedia
                                     className={classes.cardMedia}
-                                    image={productInfo && productInfo.imageUrl}
-                                    title="Image title"
+                                    image={
+                                        productInfo ? productInfo.imageUrl : '/'
+                                    }
+                                    title="Pizza"
                                 />
                                 <CardContent className={classes.cardContent}>
                                     <Typography
@@ -172,15 +179,18 @@ export default function Album(props) {
                                         <Typography>
                                             {productInfo && productInfo.price}
                                         </Typography>
-                                        <ButtonGroup
-                                            variant="text"
-                                            color="primary"
-                                            aria-label="text primary button group"
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                            }}
                                         >
                                             <span
+                                                component="span"
                                                 style={{
                                                     cursor: 'pointer',
                                                     textAlign: 'center',
+                                                    marginRight: '12px',
                                                 }}
                                                 onClick={() => {
                                                     const quantity =
@@ -198,6 +208,7 @@ export default function Album(props) {
                                                     display: 'flex',
                                                     justifyContent: 'center',
                                                     alignItems: 'center',
+                                                    marginRight: '12px',
                                                 }}
                                             >
                                                 {productInfo &&
@@ -221,7 +232,7 @@ export default function Album(props) {
                                             >
                                                 <RemoveIcon color="primary" />
                                             </span>
-                                        </ButtonGroup>
+                                        </div>
                                     </div>
                                     <Typography
                                         style={{
@@ -249,10 +260,23 @@ export default function Album(props) {
                     >
                         <Button
                             variant="outlined"
-                            color="secondary"
+                            color="primary"
                             size="large"
+                            onClick={() => {
+                                props.updateCart(productInfo)
+                                return setProductInfo(null)
+                            }}
+                            style={{ marginRight: '16px' }}
                         >
                             Add to cart
+                        </Button>
+                        <Button
+                            variant="outlined"
+                            color="secondary"
+                            size="large"
+                            onClick={() => setProductInfo(null)}
+                        >
+                            Close
                         </Button>
                     </div>
                 </SwipeableDrawer>
@@ -276,20 +300,6 @@ export default function Album(props) {
                         >
                             Your best decision!
                         </Typography>
-                        <div className={classes.heroButtons}>
-                            <Grid container spacing={2} justify="center">
-                                <Grid item>
-                                    <Button variant="contained" color="primary">
-                                        Main call to action
-                                    </Button>
-                                </Grid>
-                                <Grid item>
-                                    <Button variant="outlined" color="primary">
-                                        Secondary action
-                                    </Button>
-                                </Grid>
-                            </Grid>
-                        </div>
                     </Container>
                 </div>
                 <Container className={classes.cardGrid} maxWidth="md">
@@ -340,12 +350,14 @@ export default function Album(props) {
                                             >
                                                 View
                                             </Button>
-                                            <Button
-                                                size="small"
-                                                color="primary"
-                                            >
-                                                Edit
-                                            </Button>
+                                            {props.isAuth && (
+                                                <Button
+                                                    size="small"
+                                                    color="primary"
+                                                >
+                                                    Edit
+                                                </Button>
+                                            )}
                                         </CardActions>
                                     </Card>
                                 </Grid>
@@ -356,7 +368,7 @@ export default function Album(props) {
             {/* Footer */}
             <footer className={classes.footer}>
                 <Typography variant="h6" align="center" gutterBottom>
-                    Footer
+                    The Yummi Pizza
                 </Typography>
                 <Typography
                     variant="subtitle1"
@@ -364,7 +376,7 @@ export default function Album(props) {
                     color="textSecondary"
                     component="p"
                 >
-                    Something here to give the footer a purpose!
+                    Your best decision!
                 </Typography>
                 <Copyright />
             </footer>
@@ -372,3 +384,17 @@ export default function Album(props) {
         </React.Fragment>
     )
 }
+
+const mapStateToProps = (state) => ({
+    ...state.cart,
+    ...state.auth,
+})
+
+const mapDispatchToProps = (dispatch) => {
+    console.log(dispatch)
+    return {
+        updateCart: (products) => dispatch(actions.updateCart(products)),
+        clearCart: () => dispatch(actions.clearCart()),
+    }
+}
+export default connect(mapStateToProps, mapDispatchToProps)(Homepage)

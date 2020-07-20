@@ -1,3 +1,4 @@
 export const AUTH_SUCCESS = 'AUTH_SUCCESS'
 export const SET_CURRENT_USER = 'SET_CURRENT_USER'
 export const UPDATE_CART = 'UPDATE_CART'
+export const CLEAR_CART = 'CLEAR_CART'
