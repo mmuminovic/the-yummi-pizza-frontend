@@ -1,7 +1,7 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
 import { AppBar, Toolbar, Typography, Badge } from '@material-ui/core'
-import { Home, ShoppingCart, ViewList } from '@material-ui/icons'
+import { ShoppingCart, ViewList } from '@material-ui/icons'
 import { makeStyles } from '@material-ui/core/styles'
 
 const useStyles = makeStyles((theme) => ({
@@ -16,8 +16,11 @@ const Navigation = (props) => {
     return (
         <React.Fragment>
             <AppBar position="relative">
-                <Toolbar className="justify-content-end">
-                    <NavLink
+                <Toolbar
+                    className="justify-content-end"
+                    style={{ backgroundColor: '#ff8700' }}
+                >
+                    {/* <NavLink
                         exact
                         to="/"
                         className="nav-link"
@@ -36,7 +39,7 @@ const Navigation = (props) => {
                             <Home className={classes.icon} />
                             <span>Homepage</span>
                         </Typography>
-                    </NavLink>
+                    </NavLink> */}
                     <span
                         onClick={props.openCart}
                         className="nav-link"
