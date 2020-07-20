@@ -9,7 +9,7 @@ import App from './App'
 import * as serviceWorker from './serviceWorker'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
-axios.defaults.baseURL = 'http://localhost:8080'
+axios.defaults.baseURL = 'http://localhost:5000'
 
 ReactDOM.render(
     <Provider store={store}>

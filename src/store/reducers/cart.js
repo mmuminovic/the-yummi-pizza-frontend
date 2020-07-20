@@ -1,17 +1,14 @@
-import { updateObject } from '../utility'
 import * as actionTypes from '../actions/actionTypes'
 
 const initialState = {
     cart: [],
 }
 
-console.log('cart reducer')
-
 const reducer = (state = initialState, action) => {
     switch (action.type) {
         case actionTypes.UPDATE_CART:
             const cartIds = state.cart.map((item) => item.id)
-            if (cartIds.indexOf(action.payload.id)) {
+            if (cartIds.indexOf(action.payload.id) < 0) {
                 state.cart.push(action.payload)
             } else {
                 state = {

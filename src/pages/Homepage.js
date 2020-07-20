@@ -1,5 +1,5 @@
 import React, { useState } from 'react'
-import { useQuery } from 'react-query'
+import { useQuery, useMutation } from 'react-query'
 import { connect } from 'react-redux'
 import { Link } from 'react-router-dom'
 import {
@@ -13,13 +13,23 @@ import {
     Typography,
     Container,
     SwipeableDrawer,
-    ButtonGroup,
+    Modal,
 } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import { Remove as RemoveIcon, Add as AddIcon } from '@material-ui/icons'
-import { getProducts } from '../services/products'
+import { getProducts, takeOrder } from '../services/products'
 import actions from '../store/actions/index'
 import Navigation from '../components/Navigation'
+import {
+    ModalFooter,
+    Form,
+    Input,
+    Label,
+    FormGroup,
+    Spinner,
+} from 'reactstrap'
+import { Formik } from 'formik'
+import * as Yup from 'yup'
 
 function Copyright() {
     return (
@@ -66,11 +76,16 @@ const useStyles = makeStyles((theme) => ({
     },
     paper: {
         position: 'absolute',
-        width: 400,
+        width: '80%',
         backgroundColor: theme.palette.background.paper,
         border: '2px solid #000',
         boxShadow: theme.shadows[5],
-        padding: theme.spacing(2, 4, 3),
+        padding: theme.spacing(2, 8, 3),
+        justifyContent: 'center',
+        alignItems: 'stretch',
+        flexDirection: 'column',
+        overflow: 'auto',
+        maxHeight: '500px',
     },
     list: {
         width: 250,
@@ -78,29 +93,28 @@ const useStyles = makeStyles((theme) => ({
     fullList: {
         width: 'auto',
     },
+    cartCard: {
+        display: 'flex',
+    },
+    modalItem: {
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        border: '1px solid black',
+        flexGrow: 1,
+        padding: '8px 15px',
+        borderRadius: '5px',
+    },
 }))
-
-function getModalStyle() {
-    const top = 50
-    const left = 50
-
-    return {
-        top: `${top}%`,
-        left: `${left}%`,
-        transform: `translate(-${top}%, -${left}%)`,
-    }
-}
-
-const cards = [1, 2, 3, 4, 5, 6, 7, 8, 9]
 
 const Homepage = (props) => {
     const [modal, setModal] = useState(false)
     const [loading, setLoading] = useState(false)
-    const [modalStyle] = useState(getModalStyle)
+    const [orderProducts, setOrderProducts] = useState(null)
     const [productInfo, setProductInfo] = useState(null)
     const classes = useStyles()
 
-    const { data: products } = useQuery({
+    const { data: products, status: productStatus } = useQuery({
         queryKey: 'products',
         queryFn: async () => await getProducts(),
         config: {
@@ -113,7 +127,24 @@ const Homepage = (props) => {
         },
     })
 
-    console.log(props)
+    const cartMapped = props.cart.map((item) => ({
+        id: item.id,
+        quantity: item.quantity,
+    }))
+
+    const [takeTheOrder, takingOrder] = useMutation(
+        (data) => takeOrder({ ...data, products: cartMapped }),
+        {
+            onSuccess: () => {
+                setModal(false)
+                setProductInfo(false)
+                props.clearCart()
+            },
+            onError: () => {
+                setLoading(false)
+            },
+        }
+    )
 
     return (
         <React.Fragment>
@@ -121,20 +152,340 @@ const Homepage = (props) => {
             <CssBaseline />
             <main>
                 {/* Hero unit */}
-                {/* <Modal
+                <Modal
+                    open={!!orderProducts}
+                    onClose={() => setOrderProducts(null)}
+                    aria-labelledby="simple-modal-title"
+                    aria-describedby="simple-modal-description"
+                    style={{
+                        display: 'flex',
+                        flexGrow: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
+                >
+                    {takingOrder.status === 'success' ? (
+                        <div
+                            style={{
+                                backgroundColor: 'white',
+                                textAlign: 'center',
+                                padding: '48px',
+                            }}
+                        >
+                            <p>Taking the order was successful!</p>
+                            <Button
+                                color="secondary"
+                                onClick={() => setOrderProducts(false)}
+                            >
+                                Close
+                            </Button>
+                        </div>
+                    ) : takingOrder.status !== 'loading' ? (
+                        <Formik
+                            initialValues={{
+                                name: '',
+                                address: '',
+                                phoneNumber: '',
+                            }}
+                            onSubmit={async (values, actions) => {
+                                takeTheOrder(values)
+                            }}
+                            validationSchema={Yup.object().shape({
+                                name: Yup.string().required(),
+                                address: Yup.string().required(),
+                                phoneNumber: Yup.string().required(),
+                            })}
+                        >
+                            {(props) => {
+                                const {
+                                    values,
+                                    touched,
+                                    errors,
+                                    handleChange,
+                                    handleBlur,
+                                    handleSubmit,
+                                } = props
+                                const { response } = errors
+                                return (
+                                    <Form
+                                        onSubmit={handleSubmit}
+                                        style={{
+                                            padding: '24px',
+                                            backgroundColor: 'white',
+                                        }}
+                                    >
+                                        <FormGroup>
+                                            <Label for={'name'}>Name</Label>
+                                            <Input
+                                                name="name"
+                                                type="text"
+                                                value={values.name}
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                            />
+                                            {errors.name && touched.name && (
+                                                <div
+                                                    style={{
+                                                        color: 'orangered',
+                                                    }}
+                                                >
+                                                    {errors.name}
+                                                </div>
+                                            )}
+                                        </FormGroup>
+                                        <FormGroup>
+                                            <Label for={'address'}>
+                                                Address
+                                            </Label>
+                                            <Input
+                                                name="address"
+                                                type="text"
+                                                value={values.address}
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                            />
+                                            {errors.address && touched.address && (
+                                                <div
+                                                    style={{
+                                                        color: 'orangered',
+                                                    }}
+                                                >
+                                                    {errors.address}
+                                                </div>
+                                            )}
+                                        </FormGroup>
+                                        <FormGroup>
+                                            <Label for={'phoneNumber'}>
+                                                Phone number
+                                            </Label>
+                                            <Input
+                                                name="phoneNumber"
+                                                type="text"
+                                                value={values.phoneNumber}
+                                                onChange={handleChange}
+                                                onBlur={handleBlur}
+                                            />
+                                            {errors.phoneNumber &&
+                                                touched.phoneNumber && (
+                                                    <div
+                                                        style={{
+                                                            color: 'orangered',
+                                                        }}
+                                                    >
+                                                        {errors.phoneNumber}
+                                                    </div>
+                                                )}
+                                        </FormGroup>
+                                        {response && (
+                                            <div style={{ color: 'orangered' }}>
+                                                {response}
+                                            </div>
+                                        )}
+                                        <ModalFooter>
+                                            <Button
+                                                color="primary"
+                                                onClick={handleSubmit}
+                                                disabled={loading}
+                                            >
+                                                Order!
+                                            </Button>{' '}
+                                            <Button
+                                                color="secondary"
+                                                onClick={() =>
+                                                    setOrderProducts(false)
+                                                }
+                                                disabled={loading}
+                                            >
+                                                Cancel
+                                            </Button>
+                                        </ModalFooter>
+                                    </Form>
+                                )
+                            }}
+                        </Formik>
+                    ) : takingOrder.status === 'loading' ? (
+                        <div
+                            style={{
+                                backgroundColor: 'white',
+                                height: '200px',
+                                width: '200px',
+                                display: 'flex',
+                                justifyContent: 'center',
+                                alignItems: 'center',
+                            }}
+                        >
+                            <Spinner color="danger" />
+                        </div>
+                    ) : null}
+                </Modal>
+                <Modal
                     open={modal}
                     onClose={() => setModal(!modal)}
                     aria-labelledby="simple-modal-title"
                     aria-describedby="simple-modal-description"
+                    style={{
+                        display: 'flex',
+                        flexGrow: 1,
+                        justifyContent: 'center',
+                        alignItems: 'center',
+                    }}
                 >
-                    <div style={modalStyle} className={classes.paper}>
-                        <h2 id="simple-modal-title">Text in a modal</h2>
-                        <p id="simple-modal-description">
-                            Duis mollis, est non commodo luctus, nisi erat
-                            porttitor ligula.
-                        </p>
-                    </div>
-                </Modal> */}
+                    <Grid container className={classes.paper}>
+                        {props.cart.length > 0 ? (
+                            props.cart.map((item, i) => (
+                                <div className={classes.modalItem}>
+                                    <div>
+                                        <img
+                                            src={item.imageUrl}
+                                            alt="image"
+                                            style={{
+                                                height: '100px',
+                                                float: 'right',
+                                                marginRight: '24px',
+                                            }}
+                                        />
+                                    </div>
+                                    <div>
+                                        <Typography
+                                            gutterBottom
+                                            variant="h5"
+                                            component="h2"
+                                        >
+                                            {item.title}
+                                        </Typography>
+                                        <p>
+                                            {item.quantity} x ${item.price} = $
+                                            {(
+                                                item.quantity * item.price
+                                            ).toFixed(2)}
+                                        </p>
+                                        <div
+                                            style={{
+                                                display: 'flex',
+                                                justifyContent: 'space-between',
+                                                width: '100px',
+                                            }}
+                                        >
+                                            <span
+                                                component="span"
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    textAlign: 'center',
+                                                    marginRight: '12px',
+                                                }}
+                                                onClick={() => {
+                                                    const quantity =
+                                                        item.quantity + 1
+                                                    props.updateCart({
+                                                        ...item,
+                                                        quantity,
+                                                    })
+                                                }}
+                                            >
+                                                <AddIcon color="primary" />
+                                            </span>
+                                            <span
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'center',
+                                                    alignItems: 'center',
+                                                    marginRight: '12px',
+                                                }}
+                                            >
+                                                {item.quantity}
+                                            </span>
+                                            <span
+                                                style={{
+                                                    cursor: 'pointer',
+                                                    textAlign: 'center',
+                                                }}
+                                                onClick={() => {
+                                                    const quantity =
+                                                        item.quantity - 1
+                                                    if (quantity >= 1) {
+                                                        props.updateCart({
+                                                            ...item,
+                                                            quantity,
+                                                        })
+                                                    }
+                                                }}
+                                            >
+                                                <RemoveIcon color="primary" />
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            ))
+                        ) : (
+                            <div className={classes.modalItem}>
+                                No items in cart
+                            </div>
+                        )}
+                        {props.cart.length > 0 ? (
+                            <div>
+                                <div className={classes.modalItem}>
+                                    Shipping: $10
+                                </div>
+                                <div className={classes.modalItem}>
+                                    {props.cart.length > 1
+                                        ? `Total: ${props.cart
+                                              .reduce((acc, val) => {
+                                                  return (
+                                                      acc.price * acc.quantity +
+                                                      val.price * val.quantity
+                                                  )
+                                              })
+                                              .toFixed(
+                                                  2
+                                              )} + $10 (shipping) = ${(
+                                              props.cart.reduce((acc, val) => {
+                                                  return (
+                                                      acc.price * acc.quantity +
+                                                      val.price * val.quantity
+                                                  )
+                                              }) + 10
+                                          ).toFixed(2)}`
+                                        : `Total: ${(
+                                              props.cart[0].price *
+                                              props.cart[0].quantity
+                                          ).toFixed(2)} + $10 (shipping) = ${(
+                                              props.cart[0].price *
+                                                  props.cart[0].quantity +
+                                              10
+                                          ).toFixed(2)}`}
+                                </div>
+                            </div>
+                        ) : null}
+                        <div
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'center',
+                                paddingTop: '12px',
+                                paddingBottom: '12px',
+                            }}
+                        >
+                            {props.cart.length > 0 ? (
+                                <Button
+                                    variant="outlined"
+                                    color="primary"
+                                    size="large"
+                                    onClick={() => setOrderProducts(true)}
+                                    style={{ marginRight: '16px' }}
+                                >
+                                    Take an order
+                                </Button>
+                            ) : null}
+                            <Button
+                                variant="outlined"
+                                color="secondary"
+                                size="large"
+                                onClick={() => setModal(false)}
+                            >
+                                Close
+                            </Button>
+                        </div>
+                    </Grid>
+                </Modal>
                 <SwipeableDrawer
                     anchor={'bottom'}
                     open={!!productInfo}
@@ -303,9 +654,8 @@ const Homepage = (props) => {
                     </Container>
                 </div>
                 <Container className={classes.cardGrid} maxWidth="md">
-                    {/* End hero unit */}
                     <Grid container spacing={4}>
-                        {products &&
+                        {productStatus === 'success' ? (
                             products.map((product) => (
                                 <Grid
                                     item
@@ -361,7 +711,21 @@ const Homepage = (props) => {
                                         </CardActions>
                                     </Card>
                                 </Grid>
-                            ))}
+                            ))
+                        ) : productStatus === 'loading' ? (
+                            <div
+                                style={{
+                                    display: 'flex',
+                                    flexGrow: 1,
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                }}
+                            >
+                                <Spinner color="danger" />
+                            </div>
+                        ) : productStatus === 'error' ? (
+                            <p>Error occurs</p>
+                        ) : null}
                     </Grid>
                 </Container>
             </main>
@@ -391,7 +755,6 @@ const mapStateToProps = (state) => ({
 })
 
 const mapDispatchToProps = (dispatch) => {
-    console.log(dispatch)
     return {
         updateCart: (products) => dispatch(actions.updateCart(products)),
         clearCart: () => dispatch(actions.clearCart()),

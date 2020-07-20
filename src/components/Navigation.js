@@ -1,6 +1,5 @@
 import React from 'react'
 import { NavLink } from 'react-router-dom'
-import { connect } from 'react-redux'
 import { AppBar, Toolbar, Typography, Badge } from '@material-ui/core'
 import { Home, ShoppingCart, ViewList, Laptop } from '@material-ui/icons'
 import { makeStyles } from '@material-ui/core/styles'
@@ -13,8 +12,6 @@ const useStyles = makeStyles((theme) => ({
 
 const Navigation = (props) => {
     const classes = useStyles()
-
-    console.log(props)
 
     return (
         <React.Fragment>
@@ -110,10 +107,5 @@ const Navigation = (props) => {
         </React.Fragment>
     )
 }
-
-const mapStateToProps = (state) => ({
-    ...state.cart,
-    ...state.auth,
-})
 
 export default Navigation
