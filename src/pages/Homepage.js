@@ -234,14 +234,16 @@ const Homepage = (props) => {
                                               )
                                           }) + 10
                                       ).toFixed(2)}`
-                                    : `Total: ${(
+                                    : props.cart.length === 1
+                                    ? `Total: ${(
                                           props.cart[0].price *
                                           props.cart[0].quantity
                                       ).toFixed(2)} + $10 (shipping) = ${(
                                           props.cart[0].price *
                                               props.cart[0].quantity +
                                           10
-                                      ).toFixed(2)}`}
+                                      ).toFixed(2)}`
+                                    : null}
                             </div>
                             <Button
                                 color="secondary"
