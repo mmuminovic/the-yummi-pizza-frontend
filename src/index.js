@@ -9,7 +9,7 @@ import App from './App'
 import * as serviceWorker from './serviceWorker'
 import 'bootstrap/dist/css/bootstrap.min.css'
 
-axios.defaults.baseURL = 'http://localhost:5000'
+axios.defaults.baseURL = 'https://the-yummi-pizza-backend.herokuapp.com'
 
 ReactDOM.render(
     <Provider store={store}>
