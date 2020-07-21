@@ -28,9 +28,7 @@ const useStyles = makeStyles((theme) => ({
         justifyContent: 'center',
         alignItems: 'center',
         flexGrow: 1,
-        border: '1px solid black',
         padding: '8px 15px',
-        borderRadius: '5px',
     },
 }))
 
