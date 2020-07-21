@@ -26,9 +26,6 @@ function Copyright() {
 }
 
 const useStyles = makeStyles((theme) => ({
-    icon: {
-        marginRight: theme.spacing(1),
-    },
     heroContent: {
         backgroundColor: theme.palette.background.paper,
         padding: theme.spacing(8, 0, 6),
@@ -36,55 +33,9 @@ const useStyles = makeStyles((theme) => ({
     heroButtons: {
         marginTop: theme.spacing(4),
     },
-    cardGrid: {
-        paddingTop: theme.spacing(8),
-        paddingBottom: theme.spacing(8),
-    },
-    card: {
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-    },
-    cardMedia: {
-        paddingTop: '56.25%', // 16:9
-    },
-    cardContent: {
-        flexGrow: 1,
-    },
     footer: {
         backgroundColor: theme.palette.background.paper,
         padding: theme.spacing(6),
-    },
-    paper: {
-        position: 'absolute',
-        width: '80%',
-        backgroundColor: theme.palette.background.paper,
-        border: '2px solid #000',
-        boxShadow: theme.shadows[5],
-        padding: theme.spacing(2, 8, 3),
-        justifyContent: 'center',
-        alignItems: 'stretch',
-        flexDirection: 'column',
-        overflow: 'auto',
-        maxHeight: '500px',
-    },
-    list: {
-        width: 250,
-    },
-    fullList: {
-        width: 'auto',
-    },
-    cartCard: {
-        display: 'flex',
-    },
-    modalItem: {
-        display: 'flex',
-        justifyContent: 'center',
-        alignItems: 'center',
-        flexGrow: 1,
-        border: '1px solid black',
-        padding: '8px 15px',
-        borderRadius: '5px',
     },
 }))
 
