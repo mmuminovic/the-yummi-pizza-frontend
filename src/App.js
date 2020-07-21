@@ -1,5 +1,5 @@
 import React from 'react'
-import { Switch, Route, BrowserRouter, IndexRoute } from 'react-router-dom'
+import { Switch, Route, BrowserRouter } from 'react-router-dom'
 import Homepage from './pages/Homepage'
 import './App.css'
 
