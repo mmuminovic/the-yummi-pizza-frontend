@@ -15,7 +15,7 @@ const Navigation = (props) => {
 
     return (
         <React.Fragment>
-            <AppBar position="relative">
+            <AppBar position="fixed">
                 <Toolbar
                     className="justify-content-end"
                     style={{ backgroundColor: '#ff8700' }}
